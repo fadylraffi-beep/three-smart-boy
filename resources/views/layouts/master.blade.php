@@ -8,7 +8,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    <main class="container">
+    @include('partials.navbar')
+    <main class="container mt-2">
         @yield('content')
     </main>
 </body>
