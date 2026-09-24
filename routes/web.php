@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,9 +19,6 @@ use Illuminate\Support\Facades\Route;
 //     return view('home');
 // });
 
-Route::get('/', [HomeController::class, 'index']);
-
-Route::get('/fadhil', function () {
-    return view('test');
-});
-
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/create', [BlogController::class, 'index'])->name("show.create");
+Route::post('/create', [BlogController::class, 'create'])->name("submit.form");
