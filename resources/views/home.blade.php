@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('content')
-    <h1>Hello Nigga</h1>
+    <h1>Hello Guys</h1>
     <p>Welcome to the blog!</p>
 
     <div class="d-flex flex-row-reverse">
@@ -11,10 +11,10 @@
     <div class="d-flex flex-wrap justify-content-between align-items-stretch">
         @foreach ($blogs as $blog)
             <div class="card m-4" style="width: 18rem;">
-                <div class="card-body">
+                <div class="card-body d-flex flex-column h-100">
                     <h5 class="card-title">{{ $blog->title }}</h5>
                     <p class="card-text">{{ $blog->description }}</p>
-                    <div class="row align-items-end">
+                    <div class="row align-items-end mt-auto">
                         <a href="#" class="col card-link btn btn-outline-warning">Edit</a>
                         <a href="#" class="col card-link btn btn-outline-danger">Delete</a>
                     </div>
