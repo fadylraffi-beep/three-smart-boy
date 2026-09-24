@@ -22,3 +22,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/create', [BlogController::class, 'index'])->name("show.create");
 Route::post('/create', [BlogController::class, 'create'])->name("submit.form");
+Route::get('/edit/{id}', [BlogController::class, 'show_edit'])->name("show.edit");
+Route::put('/edit/{id}', [BlogController::class, 'edit_form'])->name("edit.form");
+Route::delete('/delete/{id}', [BlogController::class, 'delete_form'])->name("delete.form");
