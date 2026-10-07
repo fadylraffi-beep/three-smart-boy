@@ -31,6 +31,7 @@
               Logout
           </button>
         </form> --}}
+	<a href="{{ route('saml2_login', 'keycloak') }}" class="btn btn-primary">Login via Keycloak</a>
         
       </div>
     </div>
