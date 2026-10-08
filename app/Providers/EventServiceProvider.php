@@ -14,46 +14,36 @@ use Illuminate\Support\Str;
 
 class EventServiceProvider extends ServiceProvider
 {
-	/**
-	* @var array<class-string, array<int, class-string>>
-	*/
-	protected $listen = [
-		Registered::class => [
-			SendEmailVerificationNotification::class,
-		],
-	];
+    /**
+     * @var array<class-string, array<int, class-string>>
+     */
+    protected $listen = [
+        Registered::class => [
+            SendEmailVerificationNotification::class,
+        ],
+    ];
 
-    public function boot(): void
+    public function boot()
     {
-        Event::listen(Saml2LoginEvent::class, function (Saml2LoginEvent $event): void {
-            $samlUser = $event->getSaml2User();
-            $attributes = $samlUser->getAttributes();
-            $keycloakId = $samlUser->getUserId();
-            $email = $this->attribute($attributes, 'email') ?: $keycloakId;
-            $name = $this->attribute($attributes, 'name')
-                ?: trim(implode(' ', array_filter([
-                    $this->attribute($attributes, 'given_name'),
-                    $this->attribute($attributes, 'family_name'),
-                ])))
-                ?: $this->attribute($attributes, 'preferred_username')
-                ?: $email;
+        Event::listen(Saml2LoginEvent::class, function (Saml2LoginEvent $event) {
+            $user = $event->getSaml2User();
 
-            $laravelUser = User::where('keycloak_id', $keycloakId)
-                ->orWhere('email', $email)
-                ->first();
+            // 1. Ambil data yang dikirim Keycloak
+            // Perhatikan: nama atribut ('email', 'name') bergantung pada mapper di Keycloak
+            $email = $user->getAttribute('email') ? $user->getAttribute('email')[0] : $user->getUserId() . '@sso.local';
+            $name = $user->getAttribute('name') ? $user->getAttribute('name')[0] : 'User SSO';
 
-            if (! $laravelUser) {
-                $laravelUser = new User([
-                    'password' => bcrypt(Str::random(32)),
-                ]);
-            }
+            // 2. Cari user di database lokal Laravel, atau buat baru jika belum ada
+            $laravelUser = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => $name,
+                    'password' => bcrypt(Str::random(16)) // Password acak karena otentikasi ditangani Keycloak
+                ]
+            );
 
-            $laravelUser->keycloak_id = $keycloakId;
-            $laravelUser->email = $email;
-            $laravelUser->name = $name;
-            $laravelUser->save();
-
-            Auth::login($laravelUser, true);
+            // 3. PENTING: Masukkan user tersebut ke dalam session Auth Laravel!
+            Auth::login($laravelUser);
         });
     }
 
