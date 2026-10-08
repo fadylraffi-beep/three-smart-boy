@@ -7,6 +7,7 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 use Aacotroneo\Saml2\Events\Saml2LoginEvent;
+use Aacotroneo\Saml2\Events\Saml2LogoutEvent;
 use Illuminate\Support\Facades\Event;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -76,6 +77,10 @@ class EventServiceProvider extends ServiceProvider
             }
 
             Auth::login($laravelUser, true);
+        });
+
+        Event::listen(Saml2LogoutEvent::class, function (): void {
+            Auth::logout();
         });
     }
 

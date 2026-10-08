@@ -9,6 +9,10 @@ return $settings = [
         'NameIDFormat' => 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent',
         'x509cert' => env('SAML2_SP_x509', ''),
         'privateKey' => env('SAML2_SP_privateKey', ''),
+        'singleLogoutService' => [
+            'url' => '',
+            'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
+        ],
     ],
 
     // Konfigurasi Identity Provider (Keycloak)
