@@ -3,6 +3,8 @@
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,6 +32,14 @@ Route::delete('/delete/{id}', [BlogController::class, 'delete_form'])->name("del
 Route::get('/login', function () {
     return redirect()->route('saml2_login', ['idpName' => 'keycloak', 'returnTo' => url('/dashboard')]);
 })->name('login');
+
+Route::get('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('home');
+})->middleware('auth')->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware('auth')
