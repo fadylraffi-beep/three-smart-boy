@@ -30,7 +30,7 @@
                         class="btn btn-outline-primary {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         Dashboard
                     </a>
-                    <a href="{{ route('saml2_logout', ['idpName' => 'keycloak', 'returnTo' => route('home')]) }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('logout') }}" class="btn btn-outline-secondary">
                         Logout
                     </a>
                 @else
