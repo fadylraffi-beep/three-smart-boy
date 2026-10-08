@@ -28,7 +28,7 @@ Route::put('/edit/{id}', [BlogController::class, 'edit_form'])->name("edit.form"
 Route::delete('/delete/{id}', [BlogController::class, 'delete_form'])->name("delete.form");
 
 Route::get('/login', function () {
-    return redirect()->route('saml2_login', ['idpName' => 'keycloak']);
+    return redirect()->route('saml2_login', ['idpName' => 'keycloak', 'returnTo' => url('/dashboard')]);
 })->name('login');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
