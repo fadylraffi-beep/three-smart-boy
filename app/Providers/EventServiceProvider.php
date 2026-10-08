@@ -2,16 +2,17 @@
 
 namespace App\Providers;
 
+use Aacotroneo\Saml2\Events\Saml2LoginEvent;
+use Aacotroneo\Saml2\Events\Saml2LogoutEvent;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-
-use Aacotroneo\Saml2\Events\Saml2LoginEvent;
-use Aacotroneo\Saml2\Events\Saml2LogoutEvent;
-use Illuminate\Support\Facades\Event;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class EventServiceProvider extends ServiceProvider
@@ -79,8 +80,9 @@ class EventServiceProvider extends ServiceProvider
             Auth::login($laravelUser, true);
         });
 
-        Event::listen(Saml2LogoutEvent::class, function (): void {
+        Event::listen(Saml2LogoutEvent::class, function (Saml2LogoutEvent $event) {
             Auth::logout();
+            Session::flush();
         });
     }
 
