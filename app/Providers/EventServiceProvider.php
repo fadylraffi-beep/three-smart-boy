@@ -8,9 +8,9 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 
 use Aacotroneo\Saml2\Events\Saml2LoginEvent;
 use Illuminate\Support\Facades\Event;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use App\Models\User;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -23,25 +23,46 @@ class EventServiceProvider extends ServiceProvider
 		],
 	];
 
-	public function boot(): void
-	{
-	   Event::listen(Saml2LoginEvent::class, function (Saml2LoginEvent $event) {
-	      $user = $event->getSaml2User();
+    public function boot(): void
+    {
+        Event::listen(Saml2LoginEvent::class, function (Saml2LoginEvent $event): void {
+            $samlUser = $event->getSaml2User();
+            $attributes = $samlUser->getAttributes();
+            $keycloakId = $samlUser->getUserId();
+            $email = $this->attribute($attributes, 'email') ?: $keycloakId;
+            $name = $this->attribute($attributes, 'name')
+                ?: trim(implode(' ', array_filter([
+                    $this->attribute($attributes, 'given_name'),
+                    $this->attribute($attributes, 'family_name'),
+                ])))
+                ?: $this->attribute($attributes, 'preferred_username')
+                ?: $email;
 
-	      // Ambil email dari Keycloak
-	      $email = $user->getUserId();
+            $laravelUser = User::where('keycloak_id', $keycloakId)
+                ->orWhere('email', $email)
+                ->first();
 
-	      // Cari atau buat user baru di database Laravel lokal
-	      $laravelUser = User::firstOrCreate(
-	            ['email' => $email],
-	            [
-	               'name' => $email, // Default nama sesuai email
-	               'password' => bcrypt(Str::random(16)) // Menggunakan Str::random() yang valid
-	            ]
-	      );
+            if (! $laravelUser) {
+                $laravelUser = new User([
+                    'password' => bcrypt(Str::random(32)),
+                ]);
+            }
 
-	      // Login ke sesi Laravel
-	      Auth::login($laravelUser);
-	   });
-	}
+            $laravelUser->keycloak_id = $keycloakId;
+            $laravelUser->email = $email;
+            $laravelUser->name = $name;
+            $laravelUser->save();
+
+            Auth::login($laravelUser, true);
+        });
+    }
+
+    private function attribute(array $attributes, string $key): ?string
+    {
+        $value = $attributes[$key][0] ?? $attributes[$key] ?? null;
+
+        return is_scalar($value) && trim((string) $value) !== ''
+            ? trim((string) $value)
+            : null;
+    }
 }
