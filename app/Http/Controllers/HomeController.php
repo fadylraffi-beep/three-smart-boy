@@ -12,4 +12,8 @@ class HomeController extends Controller
         return view('home', compact('blogs'));
     }
 
+    public function profile(){
+        return view('profile');
+    }
+
 }
