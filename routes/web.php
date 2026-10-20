@@ -3,6 +3,7 @@
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SsoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -30,19 +31,24 @@ Route::get('/edit/{id}', [BlogController::class, 'show_edit'])->name("show.edit"
 Route::put('/edit/{id}', [BlogController::class, 'edit_form'])->name("edit.form");
 Route::delete('/delete/{id}', [BlogController::class, 'delete_form'])->name("delete.form");
 
+// Rute SSO OIDC Murni
+Route::get('/login', [SsoController::class, 'redirect'])->name('login');
+Route::get('/auth/callback', [SsoController::class, 'callback']);
+Route::get('/logout', [SsoController::class, 'logout'])->name('logout');
 
 
-Route::get('/login', function () {
-    return redirect()->route('saml2_login', ['idpName' => 'keycloak', 'returnTo' => url('/dashboard')]);
-})->name('login');
 
-Route::get('/logout', function (Request $request) {
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+// Route::get('/login', function () {
+//     return redirect()->route('saml2_login', ['idpName' => 'keycloak', 'returnTo' => url('/dashboard')]);
+// })->name('login');
 
-    return redirect()->route('home');
-})->middleware('auth')->name('logout');
+// Route::get('/logout', function (Request $request) {
+//     Auth::logout();
+//     $request->session()->invalidate();
+//     $request->session()->regenerateToken();
+
+//     return redirect()->route('home');
+// })->middleware('auth')->name('logout');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware('auth')
