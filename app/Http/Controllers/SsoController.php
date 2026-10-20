@@ -85,7 +85,7 @@ class SsoController extends Controller
         // Arahkan ke endpoint logout Keycloak sambil membawa ID Token sebagai bukti
         $query = http_build_query([
             'id_token_hint' => $idToken,
-            'post_logout_redirect_uri' => url('/'),
+            'post_logout_redirect_uri' => env('APP_URL'),
         ]);
 
         return redirect(env('KEYCLOAK_BASE_URL') . '/protocol/openid-connect/logout?' . $query);
